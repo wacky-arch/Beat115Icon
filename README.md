@@ -1,43 +1,51 @@
 # Beat115Icon
 
 Beat Saber 向け 115点カスタムアイコン表示MODです。  
-パーフェクトカット（115点）を達成した際に、「115」という数字の代わりにカスタムPNGアイコンをランダム表示します。
-
+パーフェクトカット（115点）を達成した際に、「115」という数字の代わりにカスタムPNGアイコンをランダム表示します。  
 **バニラ（Beat Saber標準）および NalulunaCutScore の両方に完全対応**しています。
+
+A custom score 115 icon replacement mod for Beat Saber.  
+Replaces the standard "115" score text with custom PNG icons upon scoring a perfect cut (115).  
+**Fully compatible with both Vanilla (standard Beat Saber) and NalulunaCutScore.**
 
 ---
 
-## 🌺 主な特徴
+> [!WARNING]
+> ### 免責事項 / Disclaimer
+> 
+> **日本語:**  
+> 本MODは wacky が個人的に楽しむために作成・カスタマイズしているものです。  
+> そのため、他のPC環境や将来のBeat Saberバージョンでの動作は保証できません。  
+> 導入およびご利用はすべて自己責任にてお願いいたします。
+> 
+> **English:**  
+> This mod is created and maintained by wacky purely for personal enjoyment.  
+> As such, proper operation in other environments or future Beat Saber versions is not guaranteed.  
+> Please use this mod entirely at your own risk.
 
-1. **バニラ＆NalulunaCutScore ハイブリッド両対応**
-   - **バニラ環境**: NalulunaCutScoreが導入されていなくても、Beat Saber標準のスコアポップアップ（`FlyingScoreEffect`）で115点が出た瞬間にアイコンを表示。
+---
+
+## 🌺 主な特徴 / Features
+
+1. **バニラ＆NalulunaCutScore ハイブリッド両対応 / Vanilla & NalulunaCutScore Dual Support**
+   - **バニラ環境**: NalulunaCutScoreが導入されていなくても、Beat Saber標準のスコアポップアップ（`FlyingScoreEffect`）で115点が出た瞬間にアイコンを表示。フェード曲線にも完全追従。
    - **NalulunaCutScore併用時**: NalulunaCutScoreのスコア表示も自動検出し、同様にアイコン化。
-2. **数字を消してクリアな表示**
-   - 115点達成時、数字テキストを完全に非表示にし、アイコンのみを綺麗に表示します。
-3. **ゼロ遅延のランダム画像抽選**
+2. **数字を消してクリアな表示 / Clean Display without Overlapping Numbers**
+   - 115点達成時、数字テキストを完全に非表示にし、アイコンのみを綺麗に描画します。
+3. **ゼロ遅延のランダム画像抽選 / Zero-lag Random Sprite Selection**
    - `UserData/Beat115Icon/` フォルダ内のすべてのPNG画像をゲーム起動時にメモリへ先読みキャッシュ。ノーツカット時のカクつき（フレームドロップ）が一切ありません。
-4. **好きな画像を追加可能**
+4. **好きな画像を追加可能 / Customizable Images**
    - お好みの透過PNG（256×256推奨）を `UserData/Beat115Icon/` に入れるだけで、自動的に抽選プールに追加されます。
    - サンプルとしてハイビスカスアイコン3種（赤・ピンク・黄）を同梱しています。
 
 ---
 
-## 🔧 前提MOD
+## 🔧 前提MOD / Prerequisites
 - [BSIPA](https://github.com/beat-saber-modding-group/BeatSaber-IPA-Reloaded) (4.3.0+)
-- ※NalulunaCutScoreは任意（無くてもバニラ単体で動作します）
+- ※NalulunaCutScoreは任意（無くてもバニラ単体で動作します / Optional）
 
 ---
 
-## 📦 インストール方法
-1. [Releases](https://github.com/wacky-arch/Beat115Icon/releases) から最新の `Beat115Icon_v1.0.0.zip` をダウンロードします。
-2. 解凍した `Plugins` および `UserData` フォルダを、Beat Saberのインストール先フォルダへ上書きコピーしてください。
-
----
-
-## ⚙️ 設定（UserData/Beat115Icon.json）
-- `Enabled`: MODの有効/無効 (既定: `true`)
-- `TargetScore`: 対象スコア (既定: `115`)
-- `VanillaIconScale`: バニラ表示時のアイコンサイズ (既定: `0.70`)
-- `IconScale`: NalulunaCutScore表示時のアイコンサイズ (既定: `0.65`)
-- `HideNumberOnTargetScore`: 115の数字を消すかどうか (既定: `true`)
-- `OverrideUnderlineColorOn115`: 115点達成時の下線色を変更するか (既定: `true`)
+## 📦 インストール方法 / Installation
+1. `Plugins/Beat115Icon.dll` を Beat Saber の `Plugins` フォルダへ配置してください。
+2. `UserData/Beat115Icon/` フォルダをお好みのアイコン画像とともに `UserData` フォルダへ配置してください。
