@@ -18,6 +18,7 @@ namespace Beat115Icon.Patches
         public TextMeshPro NumberText;
         public ImageView UnderlineImage;
         public bool IsShowingIcon;
+        public bool HasPickedSpriteForThisCut;
     }
 
     internal static class NalulunaScorePatcher
@@ -60,43 +61,59 @@ namespace Beat115Icon.Patches
                 _textField = effectType.GetFields(flags)
                     .FirstOrDefault(f => f.FieldType == typeof(TextMeshPro));
 
-                Type matSourceType = ncsAssembly.GetTypes().FirstOrDefault(t => t.GetProperty("UINoGlowMaterial", BindingFlags.Public | BindingFlags.Static) != null);
-                if (matSourceType != null)
+                MethodInfo initMethod = effectType.GetMethods(flags)
+                    .FirstOrDefault(m =>
+                    {
+                        ParameterInfo[] ps = m.GetParameters();
+                        return ps.Length == 3 && ps[0].ParameterType == typeof(IReadonlyCutScoreBuffer);
+                    });
+
+                MethodInfo updateScoreMethod = effectType.GetMethods(flags)
+                    .FirstOrDefault(m =>
+                    {
+                        ParameterInfo[] ps = m.GetParameters();
+                        return ps.Length == 1 && ps[0].ParameterType == typeof(IReadonlyCutScoreBuffer);
+                    });
+
+                MethodInfo manualUpdateMethod = effectType.GetMethods(flags)
+                    .FirstOrDefault(m =>
+                    {
+                        ParameterInfo[] ps = m.GetParameters();
+                        return m.IsVirtual && ps.Length == 1 && ps[0].ParameterType == typeof(float);
+                    });
+
+                if (updateScoreMethod == null || manualUpdateMethod == null)
                 {
-                    _uiNoGlowMaterialProp = matSourceType.GetProperty("UINoGlowMaterial", BindingFlags.Public | BindingFlags.Static);
+                    Plugin.Log?.Error("Could not locate target methods in NalulunaCutScore.");
+                    return;
                 }
 
-                MethodInfo initMethod = effectType.GetMethods(flags)
-                    .FirstOrDefault(m => m.Name.Contains("InitAndPresent") && m.GetParameters().Length >= 2);
+                Assembly utilsAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => string.Equals(a.GetName().Name, "NalulunaUtils", StringComparison.OrdinalIgnoreCase));
+                Type bsType = utilsAssembly?.GetType("NalulunaUtils.BeatSaber");
+                _uiNoGlowMaterialProp = bsType?.GetProperty("uiNoGlowMaterial", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
 
-                MethodInfo didChangeMethod = effectType.GetMethod("HandleCutScoreBufferDidChange", BindingFlags.Public | BindingFlags.Instance);
-                MethodInfo didFinishMethod = effectType.GetMethod("HandleCutScoreBufferDidFinish", BindingFlags.Public | BindingFlags.Instance);
-                MethodInfo manualUpdateMethod = effectType.GetMethod("ManualUpdate", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (initMethod != null)
+                {
+                    MethodInfo initPrefix = typeof(NalulunaScorePatcher).GetMethod(nameof(InitPrefix), BindingFlags.NonPublic | BindingFlags.Static);
+                    if (initPrefix != null)
+                    {
+                        harmony.Patch(initMethod, prefix: new HarmonyMethod(initPrefix));
+                    }
+                }
+                else
+                {
+                    Plugin.Log?.Warn("Could not locate Init method in NalulunaCutScore; proceeding with UpdateScore/ManualUpdate patches.");
+                }
 
-                MethodInfo initPostfix = typeof(NalulunaScorePatcher).GetMethod(nameof(InitPostfix), BindingFlags.NonPublic | BindingFlags.Static);
-                MethodInfo didChangePostfix = typeof(NalulunaScorePatcher).GetMethod(nameof(DidChangePostfix), BindingFlags.NonPublic | BindingFlags.Static);
-                MethodInfo didFinishPostfix = typeof(NalulunaScorePatcher).GetMethod(nameof(DidFinishPostfix), BindingFlags.NonPublic | BindingFlags.Static);
+                MethodInfo updateScorePostfix = typeof(NalulunaScorePatcher).GetMethod(nameof(UpdateScorePostfix), BindingFlags.NonPublic | BindingFlags.Static);
                 MethodInfo manualUpdatePostfix = typeof(NalulunaScorePatcher).GetMethod(nameof(ManualUpdatePostfix), BindingFlags.NonPublic | BindingFlags.Static);
 
-                if (initMethod != null && initPostfix != null)
-                {
-                    harmony.Patch(initMethod, postfix: new HarmonyMethod(initPostfix));
-                }
-                if (didChangeMethod != null && didChangePostfix != null)
-                {
-                    harmony.Patch(didChangeMethod, postfix: new HarmonyMethod(didChangePostfix));
-                }
-                if (didFinishMethod != null && didFinishPostfix != null)
-                {
-                    harmony.Patch(didFinishMethod, postfix: new HarmonyMethod(didFinishPostfix));
-                }
-                if (manualUpdateMethod != null && manualUpdatePostfix != null)
-                {
-                    harmony.Patch(manualUpdateMethod, postfix: new HarmonyMethod(manualUpdatePostfix));
-                }
+                harmony.Patch(updateScoreMethod, postfix: new HarmonyMethod(updateScorePostfix));
+                harmony.Patch(manualUpdateMethod, postfix: new HarmonyMethod(manualUpdatePostfix));
 
                 _isPatched = true;
-                Plugin.Log?.Info("NalulunaCutScore compatibility patch successfully applied!");
+                Plugin.Log?.Info($"NalulunaCutScore compatibility patch successfully applied! ({effectType.Name})");
             }
             catch (Exception ex)
             {
@@ -104,50 +121,151 @@ namespace Beat115Icon.Patches
             }
         }
 
-        private static void InitPostfix(FlyingObjectEffect __instance)
+        private static void InitPrefix(FlyingObjectEffect __instance)
         {
             var config = PluginConfig.Instance;
-            if (config == null || !config.Enabled) return;
+            if (config == null || !config.Enabled || __instance == null) return;
 
             Beat115NalulunaIconComponent comp = GetOrCreateComponent(__instance);
+            comp.HasPickedSpriteForThisCut = false;
             comp.IsShowingIcon = false;
-            if (comp.IconImage != null)
-            {
-                comp.IconImage.sprite = IconCacheService.GetRandomSprite();
-                comp.IconImage.gameObject.SetActive(false);
-            }
+
             if (comp.NumberText != null)
             {
                 comp.NumberText.enabled = true;
+                if (comp.NumberText.renderer != null)
+                {
+                    comp.NumberText.renderer.enabled = true;
+                }
+            }
+            if (comp.IconImage != null)
+            {
+                comp.IconImage.gameObject.SetActive(false);
             }
         }
 
-        private static void DidChangePostfix(FlyingObjectEffect __instance, CutScoreBuffer cutScoreBuffer)
+        private static void UpdateScorePostfix(FlyingObjectEffect __instance, IReadonlyCutScoreBuffer __0)
         {
-            CheckScore(__instance, cutScoreBuffer);
-        }
+            if (__instance == null) return;
 
-        private static void DidFinishPostfix(FlyingObjectEffect __instance, CutScoreBuffer cutScoreBuffer)
-        {
-            CheckScore(__instance, cutScoreBuffer);
-        }
-
-        private static void ManualUpdatePostfix(FlyingObjectEffect __instance, float t)
-        {
             var config = PluginConfig.Instance;
-            if (config == null || !config.Enabled) return;
+            Beat115NalulunaIconComponent comp = GetOrCreateComponent(__instance);
+            if (comp == null) return;
+
+            if (config == null || !config.Enabled || __0 == null)
+            {
+                comp.IsShowingIcon = false;
+                if (comp.NumberText != null)
+                {
+                    comp.NumberText.enabled = true;
+                    if (comp.NumberText.renderer != null)
+                    {
+                        comp.NumberText.renderer.enabled = true;
+                    }
+                }
+                if (comp.IconImage != null)
+                {
+                    comp.IconImage.gameObject.SetActive(false);
+                }
+                return;
+            }
+
+            int totalScore = __0.beforeCutScore + __0.afterCutScore + __0.centerDistanceCutScore;
+            bool isTargetScore = __0.cutScore >= config.TargetScore || totalScore >= config.TargetScore;
+
+            if (isTargetScore)
+            {
+                comp.IsShowingIcon = true;
+
+                if (comp.NumberText != null)
+                {
+                    if (config.HideNumberOnTargetScore)
+                    {
+                        comp.NumberText.SetText(string.Empty);
+                        comp.NumberText.enabled = false;
+                        if (comp.NumberText.renderer != null)
+                        {
+                            comp.NumberText.renderer.enabled = false;
+                        }
+                    }
+                    else
+                    {
+                        comp.NumberText.enabled = true;
+                        if (comp.NumberText.renderer != null)
+                        {
+                            comp.NumberText.renderer.enabled = true;
+                        }
+                    }
+                }
+
+                if (comp.IconImage != null)
+                {
+                    Material mat = GetNoGlowMaterial();
+                    if (mat != null && comp.IconImage.material != mat)
+                    {
+                        comp.IconImage.material = mat;
+                    }
+
+                    if (!comp.HasPickedSpriteForThisCut || comp.IconImage.sprite == null)
+                    {
+                        Sprite pickedSprite = IconCacheService.GetRandomSprite();
+                        if (pickedSprite != null)
+                        {
+                            comp.IconImage.sprite = pickedSprite;
+                        }
+                        comp.HasPickedSpriteForThisCut = true;
+                    }
+
+                    comp.IconImage.gameObject.layer = __instance.gameObject.layer;
+                    comp.IconImage.transform.localPosition = new Vector3(0f, config.OffsetY, -0.02f);
+                    comp.IconImage.transform.localScale = Vector3.one * config.IconScale;
+
+                    float alpha = comp.NumberText != null ? comp.NumberText.color.a : 1f;
+                    comp.IconImage.color = config.GetTintColor(alpha);
+                    comp.IconImage.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                comp.IsShowingIcon = false;
+                if (comp.NumberText != null)
+                {
+                    comp.NumberText.enabled = true;
+                    if (comp.NumberText.renderer != null)
+                    {
+                        comp.NumberText.renderer.enabled = true;
+                    }
+                }
+                if (comp.IconImage != null)
+                {
+                    comp.IconImage.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private static void ManualUpdatePostfix(FlyingObjectEffect __instance)
+        {
+            if (__instance == null) return;
 
             Beat115NalulunaIconComponent comp = __instance.GetComponent<Beat115NalulunaIconComponent>();
             if (comp == null || !comp.IsShowingIcon || comp.IconImage == null) return;
 
+            var config = PluginConfig.Instance;
+            if (config == null || !config.Enabled) return;
+
             if (config.HideNumberOnTargetScore && comp.NumberText != null)
             {
-                comp.NumberText.enabled = false;
-                MeshRenderer mr = comp.NumberText.GetComponent<MeshRenderer>();
-                if (mr != null && mr.enabled) mr.enabled = false;
+                if (comp.NumberText.enabled)
+                {
+                    comp.NumberText.enabled = false;
+                }
+                if (comp.NumberText.renderer != null && comp.NumberText.renderer.enabled)
+                {
+                    comp.NumberText.renderer.enabled = false;
+                }
             }
 
-            float alpha = Mathf.Clamp01(1f - t);
+            float alpha = comp.NumberText != null ? comp.NumberText.color.a : 1f;
             comp.IconImage.color = config.GetTintColor(alpha);
 
             if (comp.IconImage.gameObject.layer != __instance.gameObject.layer)
@@ -157,37 +275,7 @@ namespace Beat115Icon.Patches
 
             if (config.OverrideUnderlineColorOn115 && comp.UnderlineImage != null && comp.UnderlineImage.gameObject.activeSelf)
             {
-                comp.UnderlineImage.color = config.GetUnderlineColor(Mathf.Sqrt(alpha));
-            }
-        }
-
-        private static void CheckScore(FlyingObjectEffect effect, IReadonlyCutScoreBuffer cutScoreBuffer)
-        {
-            var config = PluginConfig.Instance;
-            if (config == null || !config.Enabled || effect == null) return;
-
-            Beat115NalulunaIconComponent comp = GetOrCreateComponent(effect);
-
-            if (cutScoreBuffer != null && cutScoreBuffer.cutScore == config.TargetScore)
-            {
-                comp.IsShowingIcon = true;
-                if (comp.IconImage != null)
-                {
-                    if (comp.IconImage.sprite == null) comp.IconImage.sprite = IconCacheService.GetRandomSprite();
-                    comp.IconImage.gameObject.SetActive(true);
-                }
-                if (config.HideNumberOnTargetScore && comp.NumberText != null)
-                {
-                    comp.NumberText.enabled = false;
-                    MeshRenderer mr = comp.NumberText.GetComponent<MeshRenderer>();
-                    if (mr != null && mr.enabled) mr.enabled = false;
-                }
-            }
-            else if (comp.IsShowingIcon)
-            {
-                comp.IsShowingIcon = false;
-                if (comp.IconImage != null) comp.IconImage.gameObject.SetActive(false);
-                if (comp.NumberText != null) comp.NumberText.enabled = true;
+                comp.UnderlineImage.color = config.GetUnderlineColor(Mathf.Sqrt(Mathf.Clamp01(alpha)));
             }
         }
 
@@ -214,7 +302,7 @@ namespace Beat115Icon.Patches
             imageView.type = Image.Type.Simple;
             imageView.sprite = IconCacheService.GetRandomSprite();
 
-            Material mat = GetNoGlowMaterial(effect);
+            Material mat = GetNoGlowMaterial();
             if (mat != null) imageView.material = mat;
 
             var config = PluginConfig.Instance;
@@ -229,7 +317,7 @@ namespace Beat115Icon.Patches
             return comp;
         }
 
-        private static Material GetNoGlowMaterial(FlyingObjectEffect effect)
+        internal static Material GetNoGlowMaterial()
         {
             if (_cachedNoGlowMaterial != null) return _cachedNoGlowMaterial;
 
