@@ -37,15 +37,18 @@ Replaces the standard "115" score text with custom PNG icons upon scoring a perf
 4. **好きな画像を追加可能 / Customizable Images**
    - お好みの透過PNG（256×256推奨）を `UserData/Beat115Icon/` に入れるだけで、自動的に抽選プールに追加されます。
    - サンプルとしてハイビスカスアイコン3種（赤・ピンク・黄）を同梱しています。
+5. **ゲーム内設定UI（BSML対応） / In-Game Settings UI (BSML)**
+   - **MOD SETTINGS > Beat115Icon** および **選曲画面左パネル（GameplaySetup）> Beat115Icon** の両方から、アイコンサイズ（NalulunaCutScore用 / バニラ用）・上下オフセット・115点時の数字非表示・下線色変更をリアルタイムに調整・リセットできます。
 
 ---
 
 ## 🔧 前提MOD / Prerequisites
 - [BSIPA](https://github.com/beat-saber-modding-group/BeatSaber-IPA-Reloaded) (4.3.0+)
+- [BeatSaberMarkupLanguage (BSML)](https://github.com/monkeymanboy/BeatSaberMarkupLanguage) (1.12.0+)
 - ※NalulunaCutScoreは任意（無くてもバニラ単体で動作します / Optional）
 
 ---
 
 ## 📦 インストール方法 / Installation
-1. `Plugins/Beat115Icon.dll` を Beat Saber の `Plugins` フォルダへ配置してください。
-2. `UserData/Beat115Icon/` フォルダをお好みのアイコン画像とともに `UserData` フォルダへ配置してください。
+1. [Releases](../../releases) から最新の ZIP ファイルをダウンロードし、Beat Saber のインストールフォルダにそのまま解凍してください（`Plugins/Beat115Icon.dll` と `UserData/Beat115Icon/` が配置されます）。
+2. お好みの透過PNG画像を `UserData/Beat115Icon/` フォルダへ追加・入れ替えしてお楽しみください。
