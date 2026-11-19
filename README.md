@@ -8,6 +8,10 @@ A custom score 115 icon replacement mod for Beat Saber.
 Replaces the standard "115" score text with custom PNG icons upon scoring a perfect cut (115).  
 **Fully compatible with both Vanilla (standard Beat Saber) and NalulunaCutScore.**
 
+![Beat115Icon Demo](docs/demo.gif)
+
+▶ [音声付き動画 / Full Video with Audio (MP4)](docs/demo.mp4)
+
 ---
 
 > [!WARNING]
