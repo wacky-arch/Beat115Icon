@@ -54,5 +54,8 @@
     <Reference Include="UnityEngine.UIModule">
       <HintPath>..\..\Beat Saber_Data\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>..\..\Beat Saber_Data\Managed\System.Drawing.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

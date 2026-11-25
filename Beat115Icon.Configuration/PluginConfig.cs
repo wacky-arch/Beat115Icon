@@ -19,10 +19,8 @@ internal class PluginConfig
 	public virtual float OffsetY { get; set; } = 0.02f;
 
 
-	public virtual float VanillaIconScale { get; set; } = 0.7f;
+	public virtual float DisplayDuration { get; set; } = 0f;
 
-
-	public virtual float VanillaOffsetY { get; set; }
 
 	public virtual bool HideNumberOnTargetScore { get; set; } = true;
 
@@ -63,8 +61,7 @@ internal class PluginConfig
 		Enabled = true;
 		IconScale = 0.65f;
 		OffsetY = 0.02f;
-		VanillaIconScale = 0.7f;
-		VanillaOffsetY = 0f;
+		DisplayDuration = 0f;
 		HideNumberOnTargetScore = true;
 		OverrideUnderlineColorOn115 = true;
 		Changed();

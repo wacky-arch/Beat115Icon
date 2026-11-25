@@ -1,11 +1,11 @@
 # Beat115Icon
 
-Beat Saber 向け 115点カスタムアイコン表示MODです。  
-パーフェクトカット（115点）を達成した際に、「115」という数字の代わりにカスタムPNGアイコンをランダム表示します。  
+Beat Saber（`1.40.8` / `1.44.1`）向け 115点カスタムアイコン表示MODです。  
+パーフェクトカット（115点）を達成した際に、「115」という数字の代わりにカスタム **PNG / GIFアニメーション** アイコンをランダム表示します。  
 **バニラ（Beat Saber標準）および NalulunaCutScore の両方に完全対応**しています。
 
-A custom score 115 icon replacement mod for Beat Saber.  
-Replaces the standard "115" score text with custom PNG icons upon scoring a perfect cut (115).  
+A custom score 115 icon replacement mod for Beat Saber (`1.40.8` / `1.44.1`).  
+Replaces the standard "115" score text with custom **PNG or animated GIF** icons upon scoring a perfect cut (115).  
 **Fully compatible with both Vanilla (standard Beat Saber) and NalulunaCutScore.**
 
 ![Beat115Icon Demo](docs/demo.gif)
@@ -34,13 +34,13 @@ Replaces the standard "115" score text with custom PNG icons upon scoring a perf
    - **NalulunaCutScore併用時**: NalulunaCutScoreのスコア表示も自動検出し、同様にアイコン化。
 2. **数字を消してクリアな表示 / Clean Display without Overlapping Numbers**
    - 115点達成時、数字テキストを完全に非表示にし、アイコンのみを綺麗に描画します。
-3. **ゼロ遅延のランダム画像抽選 / Zero-lag Random Sprite Selection**
-   - `UserData/Beat115Icon/` フォルダ内のすべてのPNG画像をゲーム起動時にメモリへ先読みキャッシュ。ノーツカット時のカクつき（フレームドロップ）が一切ありません。
-4. **好きな画像を追加可能 / Customizable Images**
-   - お好みの透過PNG（256×256推奨）を `UserData/Beat115Icon/` に入れるだけで、自動的に抽選プールに追加されます。
+3. **ゼロ遅延のランダム画像抽選（PNG / GIFアニメ対応） / Zero-lag Random Sprite Selection (PNG & Animated GIF)**
+   - `UserData/Beat115Icon/` フォルダ内のすべての **PNG / GIFアニメーション** 画像をゲーム起動時にメモリへ先読みキャッシュ。ノーツカット時のカクつき（フレームドロップ）が一切ありません。
+4. **好きな画像・GIFを追加可能 / Customizable PNG & GIF Images**
+   - お好みの透過PNG（256×256推奨）や透過GIFアニメを `UserData/Beat115Icon/` に入れるだけで、自動的に抽選プールに追加されます。
    - サンプルとしてハイビスカスアイコン3種（赤・ピンク・黄）を同梱しています。
-5. **ゲーム内設定UI（BSML対応） / In-Game Settings UI (BSML)**
-   - **MOD SETTINGS > Beat115Icon** および **選曲画面左パネル（GameplaySetup）> Beat115Icon** の両方から、アイコンサイズ（NalulunaCutScore用 / バニラ用）・上下オフセット・115点時の数字非表示・下線色変更をリアルタイムに調整・リセットできます。
+5. **ゲーム内設定UI（v1.1.0で共通設定に統合） / In-Game Settings UI (Unified Settings)**
+   - **MOD SETTINGS > Beat115Icon** および **選曲画面左パネル（GameplaySetup）> Beat115Icon** の両方から、NalulunaCutScore / バニラ共通の1セット設定として、有効化・アイコンサイズ・上下オフセット・115表示時間（`0.00〜3.00秒`）・数字非表示・下線色変更をリアルタイムに調整・再読込・リセットできます。
 
 ---
 
@@ -52,5 +52,5 @@ Replaces the standard "115" score text with custom PNG icons upon scoring a perf
 ---
 
 ## 📦 インストール方法 / Installation
-1. [Releases](../../releases) から最新の ZIP ファイルをダウンロードし、Beat Saber のインストールフォルダにそのまま解凍してください（`Plugins/Beat115Icon.dll` と `UserData/Beat115Icon/` が配置されます）。
-2. お好みの透過PNG画像を `UserData/Beat115Icon/` フォルダへ追加・入れ替えしてお楽しみください。
+1. [Releases](../../releases) からお使いの Beat Saber バージョン（`bs1.40.8` または `bs1.44.1`）向けの ZIP ファイルをダウンロードし、Beat Saber のインストールフォルダにそのまま解凍してください（`Plugins/Beat115Icon.dll` とサンプル画像の入った `UserData/Beat115Icon/` が配置されます）。
+2. お好みの透過PNG / GIF画像を `UserData/Beat115Icon/` フォルダへ追加・入れ替えしてお楽しみください。

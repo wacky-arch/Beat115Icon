@@ -97,25 +97,18 @@ internal static class NalulunaScorePatcher
 
 	private static void InitPrefix(FlyingObjectEffect __instance)
 	{
-		PluginConfig instance = PluginConfig.Instance;
-		if (instance == null || !instance.Enabled || __instance == null)
+		if (__instance == null)
 		{
 			return;
 		}
-		Beat115NalulunaIconComponent orCreateComponent = GetOrCreateComponent(__instance);
-		orCreateComponent.HasPickedSpriteForThisCut = false;
-		orCreateComponent.IsShowingIcon = false;
-		if (orCreateComponent.NumberText != null)
+		PluginConfig instance = PluginConfig.Instance;
+		if (instance == null || !instance.Enabled)
 		{
-			orCreateComponent.NumberText.enabled = true;
-			if (orCreateComponent.NumberText.renderer != null)
-			{
-				orCreateComponent.NumberText.renderer.enabled = true;
-			}
+			__instance.GetComponent<Beat115NalulunaIconComponent>()?.ResetState();
 		}
-		if ((UnityEngine.Object)(object)orCreateComponent.IconImage != null)
+		else
 		{
-			((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: false);
+			GetOrCreateComponent(__instance).ResetState();
 		}
 	}
 
@@ -133,19 +126,7 @@ internal static class NalulunaScorePatcher
 		}
 		if (instance == null || !instance.Enabled || __0 == null)
 		{
-			orCreateComponent.IsShowingIcon = false;
-			if (orCreateComponent.NumberText != null)
-			{
-				orCreateComponent.NumberText.enabled = true;
-				if (orCreateComponent.NumberText.renderer != null)
-				{
-					orCreateComponent.NumberText.renderer.enabled = true;
-				}
-			}
-			if ((UnityEngine.Object)(object)orCreateComponent.IconImage != null)
-			{
-				((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: false);
-			}
+			orCreateComponent.ResetState();
 			return;
 		}
 		int num = __0.beforeCutScore + __0.afterCutScore + __0.centerDistanceCutScore;
@@ -181,12 +162,18 @@ internal static class NalulunaScorePatcher
 			{
 				((Graphic)(object)orCreateComponent.IconImage).material = noGlowMaterial;
 			}
-			if (!orCreateComponent.HasPickedSpriteForThisCut || ((Image)(object)orCreateComponent.IconImage).sprite == null)
+			if (!orCreateComponent.HasPickedSpriteForThisCut || orCreateComponent.CurrentAsset == null || ((Image)(object)orCreateComponent.IconImage).sprite == null)
 			{
-				Sprite randomSprite = IconCacheService.GetRandomSprite();
-				if (randomSprite != null)
+				IconAsset randomAsset = IconCacheService.GetRandomAsset();
+				orCreateComponent.CurrentAsset = randomAsset;
+				orCreateComponent.CurrentFrameIndex = 0;
+				orCreateComponent.FrameTimer = 0f;
+				orCreateComponent.LastAnimatedFrame = Time.frameCount;
+				Sprite firstSprite = randomAsset?.FirstSprite;
+				if (firstSprite != null)
 				{
-					((Image)(object)orCreateComponent.IconImage).sprite = randomSprite;
+					((Image)(object)orCreateComponent.IconImage).sprite = firstSprite;
+					((Graphic)(object)orCreateComponent.IconImage).SetAllDirty();
 				}
 				orCreateComponent.HasPickedSpriteForThisCut = true;
 			}
@@ -198,19 +185,7 @@ internal static class NalulunaScorePatcher
 			((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: true);
 			return;
 		}
-		orCreateComponent.IsShowingIcon = false;
-		if (orCreateComponent.NumberText != null)
-		{
-			orCreateComponent.NumberText.enabled = true;
-			if (orCreateComponent.NumberText.renderer != null)
-			{
-				orCreateComponent.NumberText.renderer.enabled = true;
-			}
-		}
-		if ((UnityEngine.Object)(object)orCreateComponent.IconImage != null)
-		{
-			((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: false);
-		}
+		orCreateComponent.ResetState();
 	}
 
 	private static void ManualUpdatePostfix(FlyingObjectEffect __instance)
@@ -229,6 +204,8 @@ internal static class NalulunaScorePatcher
 		{
 			return;
 		}
+		IconEffectHelper.ApplyCustomDurationIfNeeded(__instance, ref component.HasAppliedCustomDuration);
+		IconEffectHelper.AdvanceAnimation(component.IconImage, component.CurrentAsset, ref component.CurrentFrameIndex, ref component.FrameTimer, ref component.LastAnimatedFrame);
 		if (instance.HideNumberOnTargetScore && component.NumberText != null)
 		{
 			if (component.NumberText.enabled)
@@ -246,6 +223,8 @@ internal static class NalulunaScorePatcher
 		{
 			((Component)(object)component.IconImage).gameObject.layer = __instance.gameObject.layer;
 		}
+		((Component)(object)component.IconImage).transform.localPosition = new Vector3(0f, instance.OffsetY, -0.02f);
+		((Component)(object)component.IconImage).transform.localScale = Vector3.one * instance.IconScale;
 		if (instance.OverrideUnderlineColorOn115 && (UnityEngine.Object)(object)component.UnderlineImage != null && ((Component)(object)component.UnderlineImage).gameObject.activeSelf)
 		{
 			((Graphic)(object)component.UnderlineImage).color = instance.GetUnderlineColor(Mathf.Sqrt(Mathf.Clamp01(num)));

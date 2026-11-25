@@ -2,19 +2,19 @@
     xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
   <vertical id='beat115-settings-root' child-control-height='false' child-expand-height='false' spacing='1.2' pad='2'>
     <horizontal pref-height='7' min-height='7' size-delta-y='7' child-align='MiddleCenter'>
-      <text text='Beat115Icon 設定' font-size='5.0' font-color='#FFA500' bold='true' align='Center' size-delta-x='80' size-delta-y='6.5' />
+      <text text='Beat115Icon 設定 (PNG / GIF対応)' font-size='4.8' font-color='#FFA500' bold='true' align='Center' size-delta-x='90' size-delta-y='6.5' />
     </horizontal>
 
-    <toggle-setting text='MODを有効化 (Enabled)' value='enabled' apply-on-change='true' />
-    <slider-setting text='PNGサイズ (NalulunaCutScore用)' value='icon-scale' min='0.10' max='2.00' increment='0.05' digits='2' apply-on-change='true' />
-    <slider-setting text='PNGサイズ (バニラ表示用)' value='vanilla-icon-scale' min='0.10' max='2.00' increment='0.05' digits='2' apply-on-change='true' />
-    <slider-setting text='上下位置オフセット (Naluluna用)' value='offset-y' min='-0.50' max='0.50' increment='0.01' digits='2' apply-on-change='true' />
-    <slider-setting text='上下位置オフセット (バニラ用)' value='vanilla-offset-y' min='-0.50' max='0.50' increment='0.01' digits='2' apply-on-change='true' />
-    <toggle-setting text='115点達成時に数字を非表示にする' value='hide-number' apply-on-change='true' />
-    <toggle-setting text='115点達成時に下線カラーを変更する' value='override-underline' apply-on-change='true' />
+    <toggle-setting text='MODを有効化 (Enabled)' value='enabled' bind-value='true' apply-on-change='true' />
+    <slider-setting text='アイコンサイズ' value='icon-scale' min='0.10' max='2.00' increment='0.05' bind-value='true' apply-on-change='true' />
+    <slider-setting text='上下位置オフセット' value='offset-y' min='-0.50' max='0.50' increment='0.01' bind-value='true' apply-on-change='true' />
+    <slider-setting text='115表示時間 (0=デフォルト)' value='display-duration' min='0.00' max='3.00' increment='0.05' formatter='format-duration' bind-value='true' apply-on-change='true' />
+    <toggle-setting text='115点達成時に数字を非表示にする' value='hide-number' bind-value='true' apply-on-change='true' />
+    <toggle-setting text='115点達成時に下線カラーを変更する' value='override-underline' bind-value='true' apply-on-change='true' />
 
-    <horizontal pref-height='8' min-height='8' size-delta-y='8' child-align='MiddleCenter' pad-top='1'>
-      <button text='設定を初期値に戻す (Reset Defaults)' font-size='3.2' pref-width='52' pref-height='7.0' min-width='52' min-height='7.0' size-delta-x='52' size-delta-y='7.0' pad='0' on-click='reset-defaults' hover-hint='サイズやオフセットを初期値にリセットします' />
+    <horizontal pref-height='8' min-height='8' size-delta-y='8' spacing='4' child-align='MiddleCenter' pad-top='1'>
+      <button text='画像を再読込 (Reload)' font-size='3.0' pref-width='38' pref-height='7.0' min-width='38' min-height='7.0' size-delta-x='38' size-delta-y='7.0' pad='0' on-click='reload-icons' hover-hint='UserData/Beat115Icon の PNG / GIF 画像を再読込します' />
+      <button text='初期値に戻す (Reset)' font-size='3.0' pref-width='38' pref-height='7.0' min-width='38' min-height='7.0' size-delta-x='38' size-delta-y='7.0' pad='0' on-click='reset-defaults' hover-hint='サイズ・オフセット・表示時間を初期値にリセットします' />
     </horizontal>
   </vertical>
 </bg>

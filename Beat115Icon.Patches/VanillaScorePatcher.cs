@@ -98,12 +98,17 @@ internal static class VanillaScorePatcher
 			{
 				((Graphic)(object)orCreateComponent.IconImage).material = noGlowMaterial;
 			}
-			if (!orCreateComponent.HasPickedSpriteForThisCut || ((Image)(object)orCreateComponent.IconImage).sprite == null)
+			if (!orCreateComponent.HasPickedSpriteForThisCut || orCreateComponent.CurrentAsset == null || ((Image)(object)orCreateComponent.IconImage).sprite == null)
 			{
-				Sprite randomSprite = IconCacheService.GetRandomSprite();
-				if (randomSprite != null)
+				IconAsset randomAsset = IconCacheService.GetRandomAsset();
+				orCreateComponent.CurrentAsset = randomAsset;
+				orCreateComponent.CurrentFrameIndex = 0;
+				orCreateComponent.FrameTimer = 0f;
+				orCreateComponent.LastAnimatedFrame = Time.frameCount;
+				Sprite firstSprite = randomAsset?.FirstSprite;
+				if (firstSprite != null)
 				{
-					((Image)(object)orCreateComponent.IconImage).sprite = randomSprite;
+					((Image)(object)orCreateComponent.IconImage).sprite = firstSprite;
 					((Graphic)(object)orCreateComponent.IconImage).SetAllDirty();
 				}
 				orCreateComponent.HasPickedSpriteForThisCut = true;
@@ -119,27 +124,15 @@ internal static class VanillaScorePatcher
 			((Component)(object)orCreateComponent.IconImage).gameObject.layer = __instance.gameObject.layer;
 			((Graphic)(object)orCreateComponent.IconImage).rectTransform.sizeDelta = Vector2.one;
 			((Image)(object)orCreateComponent.IconImage).preserveAspect = true;
-			((Component)(object)orCreateComponent.IconImage).transform.localPosition = new Vector3(0f, instance.VanillaOffsetY, -0.02f);
-			((Component)(object)orCreateComponent.IconImage).transform.localScale = Vector3.one * instance.VanillaIconScale;
+			((Component)(object)orCreateComponent.IconImage).transform.localPosition = new Vector3(0f, instance.OffsetY, -0.02f);
+			((Component)(object)orCreateComponent.IconImage).transform.localScale = Vector3.one * instance.IconScale;
 			float alpha = ((orCreateComponent.NumberText != null) ? Mathf.Clamp01(orCreateComponent.NumberText.color.a) : 0f);
 			((Graphic)(object)orCreateComponent.IconImage).color = instance.GetTintColor(alpha);
 			((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: true);
 			((Graphic)(object)orCreateComponent.IconImage).SetAllDirty();
 			return;
 		}
-		orCreateComponent.IsTargetScore = false;
-		if ((UnityEngine.Object)(object)orCreateComponent.IconImage != null)
-		{
-			((Component)(object)orCreateComponent.IconImage).gameObject.SetActive(value: false);
-		}
-		if (orCreateComponent.NumberText != null)
-		{
-			orCreateComponent.NumberText.enabled = true;
-			if (orCreateComponent.NumberText.renderer != null)
-			{
-				orCreateComponent.NumberText.renderer.enabled = true;
-			}
-		}
+		orCreateComponent.ResetState();
 	}
 
 	[HarmonyPatch("ManualUpdate", new Type[] { typeof(float) })]
@@ -160,6 +153,8 @@ internal static class VanillaScorePatcher
 		{
 			return;
 		}
+		IconEffectHelper.ApplyCustomDurationIfNeeded(__instance, ref component.HasAppliedCustomDuration);
+		IconEffectHelper.AdvanceAnimation(component.IconImage, component.CurrentAsset, ref component.CurrentFrameIndex, ref component.FrameTimer, ref component.LastAnimatedFrame);
 		if (instance.HideNumberOnTargetScore && component.NumberText != null)
 		{
 			if (component.NumberText.enabled)
@@ -196,7 +191,8 @@ internal static class VanillaScorePatcher
 		{
 			((Component)(object)component.IconImage).gameObject.layer = __instance.gameObject.layer;
 		}
-		((Component)(object)component.IconImage).transform.localScale = Vector3.one * instance.VanillaIconScale;
+		((Component)(object)component.IconImage).transform.localPosition = new Vector3(0f, instance.OffsetY, -0.02f);
+		((Component)(object)component.IconImage).transform.localScale = Vector3.one * instance.IconScale;
 		if (instance.OverrideUnderlineColorOn115 && component.UnderlineRenderer != null && component.UnderlineRenderer.enabled)
 		{
 			component.UnderlineRenderer.color = instance.GetUnderlineColor(alpha);
@@ -275,8 +271,8 @@ internal static class VanillaScorePatcher
 			((Graphic)(object)imageView).material = noGlowMaterial;
 		}
 		PluginConfig instance = PluginConfig.Instance;
-		float num = instance?.VanillaIconScale ?? 0.7f;
-		float y = instance?.VanillaOffsetY ?? 0f;
+		float num = instance?.IconScale ?? 0.65f;
+		float y = instance?.OffsetY ?? 0.02f;
 		gameObject2.transform.localPosition = new Vector3(0f, y, -0.02f);
 		gameObject2.transform.localScale = Vector3.one * num;
 		gameObject2.SetActive(value: false);

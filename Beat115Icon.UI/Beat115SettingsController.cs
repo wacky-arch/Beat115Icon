@@ -1,8 +1,10 @@
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Beat115Icon.Configuration;
+using Beat115Icon.Services;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.GameplaySetup;
@@ -61,21 +63,6 @@ internal class Beat115SettingsController : IDisposable, INotifyPropertyChanged
 		}
 	}
 
-	[UIValue("vanilla-icon-scale")]
-	public float VanillaIconScale
-	{
-		get => PluginConfig.Instance?.VanillaIconScale ?? 0.7f;
-		set
-		{
-			if (PluginConfig.Instance != null && Math.Abs(PluginConfig.Instance.VanillaIconScale - value) > 0.001f)
-			{
-				PluginConfig.Instance.VanillaIconScale = value;
-				PluginConfig.Instance.Changed();
-				NotifyPropertyChanged();
-			}
-		}
-	}
-
 	[UIValue("offset-y")]
 	public float OffsetY
 	{
@@ -91,15 +78,15 @@ internal class Beat115SettingsController : IDisposable, INotifyPropertyChanged
 		}
 	}
 
-	[UIValue("vanilla-offset-y")]
-	public float VanillaOffsetY
+	[UIValue("display-duration")]
+	public float DisplayDuration
 	{
-		get => PluginConfig.Instance?.VanillaOffsetY ?? 0f;
+		get => PluginConfig.Instance?.DisplayDuration ?? 0f;
 		set
 		{
-			if (PluginConfig.Instance != null && Math.Abs(PluginConfig.Instance.VanillaOffsetY - value) > 0.001f)
+			if (PluginConfig.Instance != null && Math.Abs(PluginConfig.Instance.DisplayDuration - value) > 0.001f)
 			{
-				PluginConfig.Instance.VanillaOffsetY = value;
+				PluginConfig.Instance.DisplayDuration = value;
 				PluginConfig.Instance.Changed();
 				NotifyPropertyChanged();
 			}
@@ -193,15 +180,30 @@ internal class Beat115SettingsController : IDisposable, INotifyPropertyChanged
 		}
 	}
 
+	[UIAction("format-duration")]
+	private string FormatDuration(float value)
+	{
+		if (value <= 0.01f)
+		{
+			return "Default";
+		}
+		return value.ToString("0.00", CultureInfo.InvariantCulture) + "s";
+	}
+
+	[UIAction("reload-icons")]
+	public void ReloadIcons()
+	{
+		IconCacheService.Reload(PluginConfig.Instance?.CustomDirectoryPath);
+	}
+
 	[UIAction("reset-defaults")]
 	public void ResetDefaults()
 	{
 		PluginConfig.Instance?.ResetDefaults();
 		NotifyPropertyChanged(nameof(Enabled));
 		NotifyPropertyChanged(nameof(IconScale));
-		NotifyPropertyChanged(nameof(VanillaIconScale));
 		NotifyPropertyChanged(nameof(OffsetY));
-		NotifyPropertyChanged(nameof(VanillaOffsetY));
+		NotifyPropertyChanged(nameof(DisplayDuration));
 		NotifyPropertyChanged(nameof(HideNumberOnTargetScore));
 		NotifyPropertyChanged(nameof(OverrideUnderlineColorOn115));
 	}

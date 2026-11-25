@@ -3,8 +3,8 @@
   "id": "Beat115Icon",
   "name": "Beat115Icon",
   "author": "wacky",
-  "version": "1.0.0",
-  "description": "Replaces score 115 with custom PNG icons. Supports vanilla FlyingScoreEffect and NalulunaCutScore.",
+  "version": "1.1.0",
+  "description": "Replaces score 115 with custom PNG or animated GIF icons. Supports vanilla FlyingScoreEffect and NalulunaCutScore.",
   "gameVersion": "1.40.8",
   "dependsOn": {
     "BSIPA": "^4.3.0",
